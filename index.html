@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Voice Progression Activity</title>
+<style>
+body{font-family:Arial, sans-serif;text-align:center;background:#f5f5f5;margin:0;padding:40px}
+#card{background:white;padding:40px;border-radius:16px;max-width:700px;margin:auto;box-shadow:0 10px 25px rgba(0,0,0,0.1)}
+#prompt{font-size:40px;margin-bottom:30px}
+#status{margin-top:20px;font-size:18px;color:#555}
+button{font-size:20px;padding:10px 20px;border:none;border-radius:10px;background:#4CAF50;color:white;cursor:pointer}
+button:hover{background:#43a047}
+#progress{margin-top:30px;font-size:16px;color:#888}
+</style>
+</head>
+<body>
+
+<div id="card">
+<div id="prompt">apple</div>
+<button onclick="startListening()">🎤 Speak</button>
+<div id="status">Press the microphone and say the text.</div>
+<div id="progress"></div>
+</div>
+
+<script>
+const steps = [
+  "apple",
+  "I like apples",
+  "I like apples very much",
+  "Tell me a food you like"
+];
+
+let step = 0;
+
+function updateScreen(){
+  document.getElementById("prompt").textContent = steps[step];
+  document.getElementById("progress").textContent = "Step " + (step+1) + " of " + steps.length;
+}
+
+function startListening(){
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.onerror = function(event) {
+  document.getElementById("status").textContent =
+    "Speech error: " + event.error;
+};
+  recognition.onresult = function(event){
+    const speech = event.results[0][0].transcript.toLowerCase();
+    document.getElementById("status").textContent = "You said: " + speech;
+
+    const target = steps[step].toLowerCase();
+
+    if(speech.includes(target.split(" ")[0])){
+      step++;
+      if(step >= steps.length){
+        document.getElementById("prompt").textContent = "🎉 Theme Complete!";
+        document.getElementById("status").textContent = "Great speaking!";
+        return;
+      }
+      updateScreen();
+    }
+  };
+
+  recognition.start();
+}
+
+updateScreen();
+</script>
+
+</body>
+</html>
