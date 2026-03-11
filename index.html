@@ -38,31 +38,45 @@ function updateScreen(){
 }
 
 function startListening(){
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+const SpeechRecognition =
+window.SpeechRecognition || window.webkitSpeechRecognition;
+
 const recognition = new SpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.onerror = function(event) {
-  document.getElementById("status").textContent =
-    "Speech error: " + event.error;
+
+recognition.lang = "en-US";
+recognition.continuous = false;
+recognition.interimResults = false;
+
+recognition.onresult = function(event){
+
+const speech =
+event.results[0][0].transcript.toLowerCase();
+
+document.getElementById("status").textContent =
+"You said: " + speech;
+
+if(speech.includes(steps[step].split(" ")[0])){
+
+step++;
+
+if(step >= steps.length){
+document.getElementById("prompt").textContent =
+"🎉 Finished!";
+return;
+}
+
+updateScreen();
+}
 };
-  recognition.onresult = function(event){
-    const speech = event.results[0][0].transcript.toLowerCase();
-    document.getElementById("status").textContent = "You said: " + speech;
 
-    const target = steps[step].toLowerCase();
+recognition.onerror = function(event){
+document.getElementById("status").textContent =
+"Speech error: " + event.error;
+};
 
-    if(speech.includes(target.split(" ")[0])){
-      step++;
-      if(step >= steps.length){
-        document.getElementById("prompt").textContent = "🎉 Theme Complete!";
-        document.getElementById("status").textContent = "Great speaking!";
-        return;
-      }
-      updateScreen();
-    }
-  };
+recognition.start();
 
-  recognition.start();
 }
 
 updateScreen();
